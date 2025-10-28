@@ -94,7 +94,7 @@ class AnnotationManager {
     private func deepCopy(_ annotations: [Annotation]) -> [Annotation] {
         return annotations.compactMap { annotation -> Annotation? in
             if let circle = annotation as? CircleAnnotation {
-                return CircleAnnotation(center: circle.center, radius: circle.radius, color: circle.color)
+                return CircleAnnotation(bounds: circle.bounds, color: circle.color)
             } else if let text = annotation as? TextAnnotation {
                 let copy = TextAnnotation(position: text.position, text: text.text, fontSize: text.fontSize, color: text.color)
                 return copy
