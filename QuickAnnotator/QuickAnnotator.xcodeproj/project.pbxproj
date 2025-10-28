@@ -1,0 +1,133 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+		APP_REFERENCE = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = QSA.app;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		MAIN_GROUP = {
+			isa = PBXGroup;
+			children = (
+				APP_SOURCE_GROUP,
+				PRODUCTS_GROUP,
+			);
+			sourceTree = "<group>";
+		};
+		PRODUCTS_GROUP = {
+			isa = PBXGroup;
+			children = (
+				APP_REFERENCE,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		APP_SOURCE_GROUP = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = QuickAnnotator;
+			sourceTree = "<group>";
+		};
+		PROJECT_OBJECT = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = PROJECT_BUILD_CONFIG_LIST;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = MAIN_GROUP;
+			productRefGroup = PRODUCTS_GROUP;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				APP_TARGET,
+			);
+		};
+		APP_TARGET = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = APP_BUILD_CONFIG_LIST;
+			buildPhases = (
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QSA;
+			productName = QSA;
+			productReference = APP_REFERENCE;
+			productType = "com.apple.product-type.application";
+		};
+		DEBUG_BUILD_CONFIG = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = QuickAnnotator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quickannotator.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		RELEASE_BUILD_CONFIG = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = QuickAnnotator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.quickannotator.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		APP_BUILD_CONFIG_LIST = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DEBUG_BUILD_CONFIG,
+				RELEASE_BUILD_CONFIG,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		PROJECT_BUILD_CONFIG_LIST = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DEBUG_BUILD_CONFIG,
+				RELEASE_BUILD_CONFIG,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+	};
+	rootObject = PROJECT_OBJECT;
+}
