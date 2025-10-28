@@ -11,13 +11,13 @@ class ToolbarView: NSView {
     
     weak var delegate: ToolbarDelegate?
     
-    private var selectButton: NSButton!
     private var circleButton: NSButton!
     private var textButton: NSButton!
-    
+
     private var colorButtons: [AnnotationColor: NSButton] = [:]
     private var currentMode: EditMode = .select
     private var currentColor: AnnotationColor = .red
+    private var colorButtonsContainer: NSView!
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -38,25 +38,16 @@ class ToolbarView: NSView {
         let buttonHeight: CGFloat = 32
         let spacing: CGFloat = 10
         let yPos = (bounds.height - buttonHeight) / 2
-        
-        // Select button
-        selectButton = createButton(
-            title: "Select",
-            frame: NSRect(x: xOffset, y: yPos, width: buttonWidth, height: buttonHeight),
-            action: #selector(selectModeSelected)
-        )
-        addSubview(selectButton)
-        xOffset += buttonWidth + spacing
-        
+
         // Circle button
         circleButton = createButton(
-            title: "Circle",
+            title: "Oval",
             frame: NSRect(x: xOffset, y: yPos, width: buttonWidth, height: buttonHeight),
             action: #selector(circleModeSelected)
         )
         addSubview(circleButton)
         xOffset += buttonWidth + spacing
-        
+
         // Text button
         textButton = createButton(
             title: "Text",
@@ -66,10 +57,15 @@ class ToolbarView: NSView {
         addSubview(textButton)
         xOffset += buttonWidth + spacing * 3
         
-        // Color buttons
+        // Color buttons container
         let colorSize: CGFloat = 32
+        let colorContainerWidth: CGFloat = CGFloat(AnnotationColor.allCases.count) * (colorSize + spacing)
+        colorButtonsContainer = NSView(frame: NSRect(x: xOffset, y: yPos, width: colorContainerWidth, height: colorSize))
+        addSubview(colorButtonsContainer)
+
+        var colorXOffset: CGFloat = 0
         for color in AnnotationColor.allCases {
-            let colorButton = NSButton(frame: NSRect(x: xOffset, y: yPos, width: colorSize, height: colorSize))
+            let colorButton = NSButton(frame: NSRect(x: colorXOffset, y: 0, width: colorSize, height: colorSize))
             colorButton.bezelStyle = .circular
             colorButton.isBordered = true
             colorButton.wantsLayer = true
@@ -80,13 +76,14 @@ class ToolbarView: NSView {
             colorButton.target = self
             colorButton.action = #selector(colorSelected(_:))
             colorButton.tag = color.hashValue
-            
-            addSubview(colorButton)
+
+            colorButtonsContainer.addSubview(colorButton)
             colorButtons[color] = colorButton
-            xOffset += colorSize + spacing
+            colorXOffset += colorSize + spacing
         }
-        
-        xOffset += spacing * 2
+
+        colorButtonsContainer.isHidden = true // Hidden by default
+        xOffset += colorContainerWidth + spacing * 2
         
         // Copy button
         let copyButton = createButton(
@@ -114,23 +111,27 @@ class ToolbarView: NSView {
     }
     
     // MARK: - Actions
-    
-    @objc private func selectModeSelected() {
-        currentMode = .select
-        updateButtonStates()
-        delegate?.toolbarDidSelectMode(.select)
-    }
-    
+
     @objc private func circleModeSelected() {
-        currentMode = .circle
+        // Toggle circle mode
+        if currentMode == .circle {
+            currentMode = .select
+        } else {
+            currentMode = .circle
+        }
         updateButtonStates()
-        delegate?.toolbarDidSelectMode(.circle)
+        delegate?.toolbarDidSelectMode(currentMode)
     }
-    
+
     @objc private func textModeSelected() {
-        currentMode = .text
+        // Toggle text mode
+        if currentMode == .text {
+            currentMode = .select
+        } else {
+            currentMode = .text
+        }
         updateButtonStates()
-        delegate?.toolbarDidSelectMode(.text)
+        delegate?.toolbarDidSelectMode(currentMode)
     }
     
     @objc private func colorSelected(_ sender: NSButton) {
@@ -150,11 +151,13 @@ class ToolbarView: NSView {
     }
     
     // MARK: - State Management
-    
+
     private func updateButtonStates() {
-        selectButton.state = currentMode == .select ? .on : .off
         circleButton.state = currentMode == .circle ? .on : .off
         textButton.state = currentMode == .text ? .on : .off
+
+        // Show color picker only when in circle or text mode
+        colorButtonsContainer.isHidden = (currentMode == .select)
     }
     
     private func updateColorStates() {

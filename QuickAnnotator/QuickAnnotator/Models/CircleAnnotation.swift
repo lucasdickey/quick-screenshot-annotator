@@ -2,75 +2,89 @@ import Cocoa
 
 class CircleAnnotation: Annotation {
     let id: UUID
-    var center: CGPoint
-    var radius: CGFloat
+    var bounds: CGRect  // x, y, width, height of the oval
     var color: NSColor
     let strokeWidth: CGFloat = 3.5
-    
-    init(center: CGPoint, radius: CGFloat, color: NSColor) {
+
+    init(bounds: CGRect, color: NSColor) {
         self.id = UUID()
-        self.center = center
-        self.radius = radius
+        self.bounds = bounds
         self.color = color
     }
-    
-    func draw(in context: CGContext) {
-        context.saveGState()
-        
-        // Set stroke properties
-        context.setStrokeColor(color.cgColor)
-        context.setLineWidth(strokeWidth)
-        
-        // Draw circle
-        let rect = CGRect(
+
+    // Legacy init for backward compatibility (creates a circle)
+    init(center: CGPoint, radius: CGFloat, color: NSColor) {
+        self.id = UUID()
+        self.bounds = CGRect(
             x: center.x - radius,
             y: center.y - radius,
             width: radius * 2,
             height: radius * 2
         )
-        context.strokeEllipse(in: rect)
-        
+        self.color = color
+    }
+    
+    func draw(in context: CGContext) {
+        context.saveGState()
+
+        // Set stroke properties
+        context.setStrokeColor(color.cgColor)
+        context.setLineWidth(strokeWidth)
+
+        // Draw oval using bounds
+        context.strokeEllipse(in: bounds)
+
         context.restoreGState()
     }
     
     func contains(point: CGPoint) -> Bool {
-        let distance = sqrt(pow(point.x - center.x, 2) + pow(point.y - center.y, 2))
-        // Check if point is near the circle outline (within stroke width tolerance)
+        // Check if point is inside the oval bounds (with some tolerance)
         let tolerance = strokeWidth * 2
-        return abs(distance - radius) <= tolerance
+        let expandedBounds = bounds.insetBy(dx: -tolerance, dy: -tolerance)
+        return expandedBounds.contains(point)
     }
     
     func move(by delta: CGPoint) {
-        center = CGPoint(x: center.x + delta.x, y: center.y + delta.y)
+        bounds.origin.x += delta.x
+        bounds.origin.y += delta.y
     }
-    
+
     func getBounds() -> CGRect {
-        return CGRect(
-            x: center.x - radius - strokeWidth,
-            y: center.y - radius - strokeWidth,
-            width: (radius + strokeWidth) * 2,
-            height: (radius + strokeWidth) * 2
-        )
+        return bounds.insetBy(dx: -strokeWidth, dy: -strokeWidth)
     }
     
     // Resize methods for handles
-    func resize(to newRadius: CGFloat) {
-        self.radius = max(10, newRadius) // Minimum radius of 10
+    func resize(to newBounds: CGRect) {
+        // Ensure minimum size
+        let minSize: CGFloat = 10
+        self.bounds = CGRect(
+            x: newBounds.origin.x,
+            y: newBounds.origin.y,
+            width: max(minSize, newBounds.width),
+            height: max(minSize, newBounds.height)
+        )
     }
-    
+
     func getResizeHandles() -> [CGRect] {
         let handleSize: CGFloat = 8
+        let minX = bounds.minX
+        let midX = bounds.midX
+        let maxX = bounds.maxX
+        let minY = bounds.minY
+        let midY = bounds.midY
+        let maxY = bounds.maxY
+
         let positions: [CGPoint] = [
-            CGPoint(x: center.x, y: center.y + radius), // Top
-            CGPoint(x: center.x + radius, y: center.y), // Right
-            CGPoint(x: center.x, y: center.y - radius), // Bottom
-            CGPoint(x: center.x - radius, y: center.y), // Left
-            CGPoint(x: center.x + radius * cos(.pi / 4), y: center.y + radius * sin(.pi / 4)), // Top-right
-            CGPoint(x: center.x + radius * cos(3 * .pi / 4), y: center.y + radius * sin(3 * .pi / 4)), // Top-left
-            CGPoint(x: center.x + radius * cos(5 * .pi / 4), y: center.y + radius * sin(5 * .pi / 4)), // Bottom-left
-            CGPoint(x: center.x + radius * cos(7 * .pi / 4), y: center.y + radius * sin(7 * .pi / 4))  // Bottom-right
+            CGPoint(x: minX, y: minY), // Bottom-left
+            CGPoint(x: midX, y: minY), // Bottom
+            CGPoint(x: maxX, y: minY), // Bottom-right
+            CGPoint(x: maxX, y: midY), // Right
+            CGPoint(x: maxX, y: maxY), // Top-right
+            CGPoint(x: midX, y: maxY), // Top
+            CGPoint(x: minX, y: maxY), // Top-left
+            CGPoint(x: minX, y: midY)  // Left
         ]
-        
+
         return positions.map { point in
             CGRect(
                 x: point.x - handleSize / 2,

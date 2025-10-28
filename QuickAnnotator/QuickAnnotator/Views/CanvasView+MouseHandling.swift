@@ -33,17 +33,51 @@ extension CanvasView {
     
     func handleSelectModeMouseDragged(to point: CGPoint) {
         guard let startPoint = dragStartPoint else { return }
-        
-        // Handle circle resizing
-        if let circle = resizingCircle, let _ = resizeHandleIndex {
-            let newRadius = sqrt(pow(point.x - circle.center.x, 2) + pow(point.y - circle.center.y, 2))
-            
+
+        // Handle oval resizing
+        if let oval = resizingCircle, let handleIndex = resizeHandleIndex {
             if !isDragging {
                 annotationManager.updateAnnotations()
                 isDragging = true
             }
-            
-            circle.resize(to: newRadius)
+
+            // Calculate new bounds based on which handle is being dragged
+            let originalBounds = oval.bounds
+            var newBounds = originalBounds
+
+            // Handles: 0=BL, 1=B, 2=BR, 3=R, 4=TR, 5=T, 6=TL, 7=L
+            switch handleIndex {
+            case 0: // Bottom-left
+                newBounds.size.width = originalBounds.maxX - point.x
+                newBounds.size.height = originalBounds.maxY - point.y
+                newBounds.origin.x = point.x
+                newBounds.origin.y = point.y
+            case 1: // Bottom
+                newBounds.size.height = originalBounds.maxY - point.y
+                newBounds.origin.y = point.y
+            case 2: // Bottom-right
+                newBounds.size.width = point.x - originalBounds.minX
+                newBounds.size.height = originalBounds.maxY - point.y
+                newBounds.origin.y = point.y
+            case 3: // Right
+                newBounds.size.width = point.x - originalBounds.minX
+            case 4: // Top-right
+                newBounds.size.width = point.x - originalBounds.minX
+                newBounds.size.height = point.y - originalBounds.minY
+            case 5: // Top
+                newBounds.size.height = point.y - originalBounds.minY
+            case 6: // Top-left
+                newBounds.size.width = originalBounds.maxX - point.x
+                newBounds.size.height = point.y - originalBounds.minY
+                newBounds.origin.x = point.x
+            case 7: // Left
+                newBounds.size.width = originalBounds.maxX - point.x
+                newBounds.origin.x = point.x
+            default:
+                break
+            }
+
+            oval.resize(to: newBounds)
             needsDisplay = true
             return
         }
@@ -70,45 +104,58 @@ extension CanvasView {
         isDragging = false
     }
     
-    // MARK: - Circle Mode Handlers
-    
+    // MARK: - Circle/Oval Mode Handlers
+
     func handleCircleModeMouseDown(at point: CGPoint) {
-        tempCircleCenter = point
-        tempCircleRadius = 0
+        tempOvalStart = point
+        tempOvalEnd = point
     }
-    
+
     func handleCircleModeMouseDragged(to point: CGPoint) {
-        guard let center = tempCircleCenter else { return }
-        
-        // Calculate radius from center to current point
-        tempCircleRadius = sqrt(pow(point.x - center.x, 2) + pow(point.y - center.y, 2))
+        guard let _ = tempOvalStart else { return }
+
+        tempOvalEnd = point
         needsDisplay = true
     }
-    
+
     func handleCircleModeMouseUp(at point: CGPoint) {
-        guard let center = tempCircleCenter, tempCircleRadius > 5 else {
-            // Too small, cancel
-            tempCircleCenter = nil
-            tempCircleRadius = 0
+        guard let start = tempOvalStart, let end = tempOvalEnd else {
+            tempOvalStart = nil
+            tempOvalEnd = nil
             needsDisplay = true
             return
         }
-        
-        // Create circle annotation
-        let circle = CircleAnnotation(
-            center: center,
-            radius: tempCircleRadius,
+
+        // Calculate bounds from start and end points
+        let bounds = CGRect(
+            x: min(start.x, end.x),
+            y: min(start.y, end.y),
+            width: abs(end.x - start.x),
+            height: abs(end.y - start.y)
+        )
+
+        // Only create if large enough
+        guard bounds.width > 5 && bounds.height > 5 else {
+            tempOvalStart = nil
+            tempOvalEnd = nil
+            needsDisplay = true
+            return
+        }
+
+        // Create oval annotation
+        let oval = CircleAnnotation(
+            bounds: bounds,
             color: currentColor.nsColor
         )
-        annotationManager.add(circle)
-        
+        annotationManager.add(oval)
+
         // Reset temp state
-        tempCircleCenter = nil
-        tempCircleRadius = 0
-        
+        tempOvalStart = nil
+        tempOvalEnd = nil
+
         // Switch back to select mode
         currentMode = .select
-        
+
         needsDisplay = true
     }
     

@@ -1,4 +1,4 @@
-# Project Spec: Quick Screenshot Annotator (MacOS)
+# Project Spec: QSA - Quick Screenshot Annotator (MacOS)
 
 ## Overview
 A lightweight MacOS native app for rapidly annotating screenshots with circles and text, then copying the result back to clipboard for immediate sharing.

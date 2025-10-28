@@ -13,21 +13,21 @@ class CanvasView: NSView {
     var currentColor: AnnotationColor = .red
     
     // Selection state
-    private var selectedAnnotation: Annotation?
-    private var dragStartPoint: CGPoint?
-    private var isDragging = false
-    
-    // Circle creation state
-    private var tempCircleCenter: CGPoint?
-    private var tempCircleRadius: CGFloat = 0
-    
+    var selectedAnnotation: Annotation?
+    var dragStartPoint: CGPoint?
+    var isDragging = false
+
+    // Oval creation state
+    var tempOvalStart: CGPoint?
+    var tempOvalEnd: CGPoint?
+
     // Resize state
-    private var resizingCircle: CircleAnnotation?
-    private var resizeHandleIndex: Int?
-    
+    var resizingCircle: CircleAnnotation?
+    var resizeHandleIndex: Int?
+
     // Text editing
-    private var editingText: TextAnnotation?
-    private var textField: NSTextField?
+    var editingText: TextAnnotation?
+    var textField: NSTextField?
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -48,12 +48,8 @@ class CanvasView: NSView {
         self.baseImage = image
         self.annotationManager = AnnotationManager()
         self.selectedAnnotation = nil
-        
-        // Resize view to fit image
-        if let imageSize = image.representations.first?.size {
-            setFrameSize(imageSize)
-        }
-        
+
+        // Keep canvas at full window size, image will be centered
         needsDisplay = true
     }
     
@@ -66,9 +62,12 @@ class CanvasView: NSView {
         context.setFillColor(NSColor.white.cgColor)
         context.fill(bounds)
         
-        // Draw base image
+        // Draw base image centered in canvas
         if let image = baseImage {
-            let imageRect = CGRect(origin: .zero, size: bounds.size)
+            let imageSize = image.size
+            let x = (bounds.width - imageSize.width) / 2
+            let y = (bounds.height - imageSize.height) / 2
+            let imageRect = CGRect(x: x, y: y, width: imageSize.width, height: imageSize.height)
             image.draw(in: imageRect)
         }
         
@@ -77,15 +76,15 @@ class CanvasView: NSView {
             annotation.draw(in: context)
         }
         
-        // Draw temporary circle while creating
-        if let center = tempCircleCenter, tempCircleRadius > 0 {
+        // Draw temporary oval while creating
+        if let start = tempOvalStart, let end = tempOvalEnd {
             context.setStrokeColor(currentColor.cgColor)
             context.setLineWidth(3.5)
             let rect = CGRect(
-                x: center.x - tempCircleRadius,
-                y: center.y - tempCircleRadius,
-                width: tempCircleRadius * 2,
-                height: tempCircleRadius * 2
+                x: min(start.x, end.x),
+                y: min(start.y, end.y),
+                width: abs(end.x - start.x),
+                height: abs(end.y - start.y)
             )
             context.strokeEllipse(in: rect)
         }
@@ -140,7 +139,13 @@ class CanvasView: NSView {
             return
         }
         
-        // Single click handling based on mode
+        // Check if clicking on an existing annotation (always allow selection)
+        if let annotation = annotationManager.findAnnotation(at: point) {
+            handleSelectModeMouseDown(at: point)
+            return
+        }
+
+        // Single click handling based on mode for creating new annotations
         switch currentMode {
         case .select:
             handleSelectModeMouseDown(at: point)

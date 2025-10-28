@@ -13,7 +13,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             defer: false
         )
         window.center()
-        window.title = "Quick Annotator"
+        window.title = "QSA"
         window.setFrameAutosaveName("MainWindow")
         
         // Create and set main view controller
@@ -54,9 +54,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         mainMenu.addItem(appMenuItem)
         let appMenu = NSMenu()
         appMenuItem.submenu = appMenu
-        appMenu.addItem(withTitle: "About Quick Annotator", action: nil, keyEquivalent: "")
+        appMenu.addItem(withTitle: "About QSA", action: nil, keyEquivalent: "")
         appMenu.addItem(NSMenuItem.separator())
-        appMenu.addItem(withTitle: "Quit Quick Annotator", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: "Quit QSA", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         
         // Edit menu
         let editMenuItem = NSMenuItem()

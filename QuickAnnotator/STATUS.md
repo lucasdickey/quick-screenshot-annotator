@@ -2,7 +2,7 @@
 
 ## Implementation Complete ✅
 
-This document tracks the implementation status of Quick Annotator against the PROJECT_SPEC.md requirements.
+This document tracks the implementation status of QSA (Quick Screenshot Annotator) against the PROJECT_SPEC.md requirements.
 
 ---
 

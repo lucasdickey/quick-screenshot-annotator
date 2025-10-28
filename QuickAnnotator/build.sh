@@ -4,7 +4,7 @@
 
 set -e
 
-echo "Building Quick Annotator..."
+echo "Building QSA..."
 
 # Clean previous builds
 rm -rf build/
@@ -13,7 +13,7 @@ rm -rf build/
 mkdir -p build
 
 # Compile all Swift files
-swiftc -o build/QuickAnnotator \
+swiftc -o build/QSA \
     -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
     -target x86_64-apple-macosx12.0 \
     -framework Cocoa \
@@ -32,7 +32,7 @@ swiftc -o build/QuickAnnotator \
     QuickAnnotator/Views/ToolbarView.swift
 
 echo "✅ Build completed successfully!"
-echo "Binary located at: build/QuickAnnotator"
+echo "Binary located at: build/QSA"
 echo ""
 echo "To create an app bundle, use Xcode or run:"
-echo "  xcodebuild -project QuickAnnotator.xcodeproj -scheme QuickAnnotator -configuration Release"
+echo "  xcodebuild -project QuickAnnotator.xcodeproj -scheme QSA -configuration Release"
